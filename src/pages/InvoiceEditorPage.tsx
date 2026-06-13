@@ -184,15 +184,10 @@ export default function InvoiceEditorPage() {
   const applyTemplate = (templateId: string) => {
     const tpl = ITEM_TEMPLATES.find((t) => t.id === templateId)
     if (!tpl) return
+    // Selecting a template replaces the current line items with that template's
+    // rows (prefilled with editable market-rate estimates).
     const rows = tpl.items.map((it) => ({ ...it, id: uid() }))
-    setDraft((d) => {
-      if (!d) return d
-      // Replace a pristine/empty item list; otherwise append.
-      const blank = d.items.every(
-        (it) => !it.description.trim() && !it.unitPrice && it.quantity <= 1,
-      )
-      return { ...d, items: blank ? rows : [...d.items, ...rows] }
-    })
+    setDraft((d) => (d ? { ...d, items: rows } : d))
   }
 
   const save = (opts?: { download?: boolean }) => {
@@ -309,7 +304,7 @@ export default function InvoiceEditorPage() {
               e.target.value = ''
             }}
           >
-            <option value="">＋ Add items…</option>
+            <option value="">Pick a template…</option>
             {TEMPLATE_GROUPS.map((group) => (
               <optgroup key={group} label={group}>
                 {ITEM_TEMPLATES.filter((t) => t.group === group).map((t) => (
@@ -519,7 +514,7 @@ export default function InvoiceEditorPage() {
                 e.target.value = ''
               }}
             >
-              <option value="">Insert a template…</option>
+              <option value="">Replace items with a template…</option>
               {TEMPLATE_GROUPS.map((group) => (
                 <optgroup key={group} label={group}>
                   {ITEM_TEMPLATES.filter((t) => t.group === group).map((t) => (
@@ -531,6 +526,10 @@ export default function InvoiceEditorPage() {
               ))}
             </select>
           </div>
+          <p className="template-hint">
+            Templates come with editable market-rate estimates (USD) — adjust to your work
+            and currency.
+          </p>
         </div>
 
         {/* Totals */}

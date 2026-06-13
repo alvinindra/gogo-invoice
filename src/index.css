@@ -1176,3 +1176,8 @@ h3 {
   outline: none;
   box-shadow: var(--ring);
 }
+.template-hint {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: #837a67;
+}
