@@ -713,6 +713,15 @@ h3 {
   font-size: 0.85rem;
   padding: 7px 30px 7px 10px;
 }
+.doc-toolbar__field--accent span {
+  color: var(--primary);
+}
+.doc-toolbar__field--accent .select {
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+  background-color: var(--primary-soft);
+}
 
 /* The invoice sheet — always light, like the printed PDF. */
 .paper {

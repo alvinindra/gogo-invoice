@@ -298,6 +298,29 @@ export default function InvoiceEditorPage() {
             <option value="paid">Paid</option>
           </select>
         </label>
+        <label className="doc-toolbar__field doc-toolbar__field--accent">
+          <span>Template</span>
+          <select
+            className="select"
+            value=""
+            aria-label="Start from a line-item template"
+            onChange={(e) => {
+              if (e.target.value) applyTemplate(e.target.value)
+              e.target.value = ''
+            }}
+          >
+            <option value="">＋ Add items…</option>
+            {TEMPLATE_GROUPS.map((group) => (
+              <optgroup key={group} label={group}>
+                {ITEM_TEMPLATES.filter((t) => t.group === group).map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </label>
 
         <span className="nav-spacer" />
         {toast ? <span className="tag">{toast}</span> : null}
