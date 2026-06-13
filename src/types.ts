@@ -24,6 +24,7 @@ export const companySnapshotSchema = z.object({
   email: z.string().default(''),
   phone: z.string().default(''),
   address: z.string().default(''),
+  country: z.string().default(''),
   website: z.string().default(''),
   taxId: z.string().default(''),
   bankDetails: z.string().default(''),
@@ -50,6 +51,7 @@ export const clientSchema = z.object({
   email: z.string().default(''),
   phone: z.string().default(''),
   address: z.string().default(''),
+  country: z.string().default(''),
 })
 export type Client = z.infer<typeof clientSchema>
 

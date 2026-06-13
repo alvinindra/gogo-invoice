@@ -22,6 +22,11 @@ and copy from, and JSON backup/restore.
   the company name is required — everything else is optional.
 - 🧾 **Full invoices** — line items, percentage **or** fixed discount, configurable
   tax (label + rate), shipping, notes and terms, plus draft / sent / paid status.
+- 🧩 **Line-item templates** for common trades — software/IT (incl. pass-through
+  infrastructure), design, accounting & tax, finance & advisory, and general
+  services. Insert a starter set of rows in one click, then fill the amounts.
+- 🌍 **Country picker** on both the sender and Bill To, plus example placeholders
+  that show exactly what to fill in.
 - 🔢 **Auto invoice numbering** per company with a custom prefix and zero-padding —
   always overridable per invoice.
 - 💱 **Per-invoice currency** — defaults to USD, switch any invoice to one of 24+

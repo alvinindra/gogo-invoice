@@ -14,6 +14,9 @@ import {
   suggestedNumber,
 } from '../lib/factory'
 import { CURRENCIES } from '../lib/currencies'
+import { COUNTRIES } from '../lib/countries'
+import { ITEM_TEMPLATES, TEMPLATE_GROUPS } from '../lib/templates'
+import { uid } from '../lib/id'
 import {
   CopyIcon,
   DownloadIcon,
@@ -178,6 +181,20 @@ export default function InvoiceEditorPage() {
   const removeItem = (itemId: string) =>
     setDraft((d) => (d ? { ...d, items: d.items.filter((it) => it.id !== itemId) } : d))
 
+  const applyTemplate = (templateId: string) => {
+    const tpl = ITEM_TEMPLATES.find((t) => t.id === templateId)
+    if (!tpl) return
+    const rows = tpl.items.map((it) => ({ ...it, id: uid() }))
+    setDraft((d) => {
+      if (!d) return d
+      // Replace a pristine/empty item list; otherwise append.
+      const blank = d.items.every(
+        (it) => !it.description.trim() && !it.unitPrice && it.quantity <= 1,
+      )
+      return { ...d, items: blank ? rows : [...d.items, ...rows] }
+    })
+  }
+
   const save = (opts?: { download?: boolean }) => {
     if (!draft) return
     const toSave: Invoice = { ...draft, updatedAt: new Date().toISOString() }
@@ -341,7 +358,7 @@ export default function InvoiceEditorPage() {
             <EditableText
               className="paper__company-name"
               value={c.name}
-              placeholder="Your Company"
+              placeholder="e.g. Gogo CTO as a Service"
               ariaLabel="Company name"
               onChange={(v) => setCompanyField('name', v)}
               onCommit={(v) => commitCompanyField('name', v)}
@@ -349,10 +366,20 @@ export default function InvoiceEditorPage() {
             <EditableArea
               className="paper__muted paper__sender"
               value={c.address}
-              placeholder={'Your address\nEmail · phone · tax ID'}
+              placeholder={
+                'e.g. Jl. Sudirman No. 1, Jakarta\nhello@yourcompany.com · +62 812 3456 7890\nTax ID / NPWP 00.000.000.0'
+              }
               ariaLabel="Your address and contact details"
               onChange={(v) => setCompanyField('address', v)}
               onCommit={(v) => commitCompanyField('address', v)}
+            />
+            <CountrySelect
+              value={c.country}
+              ariaLabel="Your country"
+              onChange={(v) => {
+                setCompanyField('country', v)
+                commitCompanyField('country', v)
+              }}
             />
           </div>
 
@@ -394,16 +421,23 @@ export default function InvoiceEditorPage() {
             <EditableText
               className="paper__client-name"
               value={draft.client.name}
-              placeholder="Client name"
+              placeholder="e.g. Braid Research, Inc."
               ariaLabel="Client name"
               onChange={(v) => setClient('name', v)}
             />
             <EditableArea
               className="paper__muted"
               value={draft.client.address}
-              placeholder={'Client address\nEmail · phone'}
+              placeholder={
+                'e.g. 166 Geary St, San Francisco, CA\nbilling@client.com · +1 555 0100'
+              }
               ariaLabel="Client address and contact"
               onChange={(v) => setClient('address', v)}
+            />
+            <CountrySelect
+              value={draft.client.country}
+              ariaLabel="Client country"
+              onChange={(v) => setClient('country', v)}
             />
           </div>
         </div>
@@ -421,7 +455,7 @@ export default function InvoiceEditorPage() {
             <div className="paper__items-row" key={it.id}>
               <EditableText
                 value={it.description}
-                placeholder="Item description"
+                placeholder="e.g. Web development — June 2026"
                 ariaLabel="Item description"
                 onChange={(v) => updateItem(it.id, { description: v })}
               />
@@ -449,9 +483,31 @@ export default function InvoiceEditorPage() {
               </button>
             </div>
           ))}
-          <button type="button" className="add-item" onClick={addItem}>
-            <PlusIcon className="btn-icon" /> Add item
-          </button>
+          <div className="paper__items-actions">
+            <button type="button" className="add-item" onClick={addItem}>
+              <PlusIcon className="btn-icon" /> Add item
+            </button>
+            <select
+              className="template-select"
+              value=""
+              aria-label="Insert a line-item template"
+              onChange={(e) => {
+                if (e.target.value) applyTemplate(e.target.value)
+                e.target.value = ''
+              }}
+            >
+              <option value="">Insert a template…</option>
+              {TEMPLATE_GROUPS.map((group) => (
+                <optgroup key={group} label={group}>
+                  {ITEM_TEMPLATES.filter((t) => t.group === group).map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Totals */}
@@ -581,12 +637,14 @@ export default function InvoiceEditorPage() {
               onChange={(v) => set('terms', v)}
             />
           </div>
-          <div className="block">
+          <div className="block block--wide">
             <h3>Payment details</h3>
             <EditableArea
               className="paper__muted"
               value={c.bankDetails}
-              placeholder="Bank / payment details (optional)"
+              placeholder={
+                'e.g. Bank: OCBC · Account: 230800006705 · SWIFT: NISPIDJA\nReceiver: CV. Gogo Cuan Wastuargo · Jl. Cik Di Tiro No 7, Yogyakarta'
+              }
               ariaLabel="Payment details"
               onChange={(v) => setCompanyField('bankDetails', v)}
               onCommit={(v) => commitCompanyField('bankDetails', v)}
@@ -595,6 +653,31 @@ export default function InvoiceEditorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+interface CountrySelectProps {
+  value: string
+  ariaLabel: string
+  onChange: (v: string) => void
+}
+
+/** An unobtrusive country picker that sits inline on the invoice. */
+function CountrySelect({ value, ariaLabel, onChange }: CountrySelectProps) {
+  return (
+    <select
+      className={`paper-country ${value ? '' : 'is-empty'}`}
+      value={value}
+      aria-label={ariaLabel}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="">Country (optional)</option>
+      {COUNTRIES.map((co) => (
+        <option key={co.code} value={co.name}>
+          {co.name}
+        </option>
+      ))}
+    </select>
   )
 }
 

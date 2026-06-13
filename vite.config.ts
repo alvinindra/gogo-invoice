@@ -18,8 +18,8 @@ export default defineConfig({
         short_name: 'Invoice',
         description:
           'Offline-first invoice generator. No backend — your data stays on your device.',
-        theme_color: '#4f46e5',
-        background_color: '#ffffff',
+        theme_color: '#1d5b48',
+        background_color: '#efe7d6',
         display: 'standalone',
         start_url: BASE,
         scope: BASE,

@@ -1,6 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
+// Self-hosted variable fonts (keeps the app fully offline).
+import '@fontsource-variable/fraunces'
+import '@fontsource-variable/hanken-grotesk'
+import '@fontsource-variable/spline-sans-mono'
 import App from './App'
 import { AppProvider } from './store/AppStore'
 import './index.css'

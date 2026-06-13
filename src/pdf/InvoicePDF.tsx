@@ -4,7 +4,7 @@ import { formatCurrency, formatDate } from '../lib/format'
 import type { Invoice } from '../types'
 
 const COLORS = {
-  primary: '#4f46e5',
+  primary: '#1d5b48',
   text: '#1a1d29',
   muted: '#6b7280',
   faint: '#9aa1b0',
@@ -114,6 +114,7 @@ export function InvoiceDocument({ invoice }: { invoice: Invoice }) {
 
   const companyLines = [
     c.address,
+    c.country,
     c.email,
     c.phone,
     c.website,
@@ -122,6 +123,7 @@ export function InvoiceDocument({ invoice }: { invoice: Invoice }) {
 
   const clientLines = [
     invoice.client.address,
+    invoice.client.country,
     invoice.client.email,
     invoice.client.phone,
   ].filter(Boolean)

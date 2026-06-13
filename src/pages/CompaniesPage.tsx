@@ -4,6 +4,7 @@ import { Field } from '../components/Field'
 import { EditableNumber } from '../components/Editable'
 import { BuildingIcon, PlusIcon, TrashIcon, EditIcon } from '../components/icons'
 import { CURRENCIES } from '../lib/currencies'
+import { COUNTRIES } from '../lib/countries'
 import { createCompany, suggestedNumber } from '../lib/factory'
 import type { Company } from '../types'
 
@@ -113,6 +114,21 @@ export default function CompaniesPage() {
               placeholder={'123 Market Street\nSan Francisco, CA\nbilling@acme.com'}
               onChange={(e) => set('address', e.target.value)}
             />
+          </Field>
+
+          <Field label="Country (optional)">
+            <select
+              className="select"
+              value={draft.country}
+              onChange={(e) => set('country', e.target.value)}
+            >
+              <option value="">Select a country…</option>
+              {COUNTRIES.map((co) => (
+                <option key={co.code} value={co.name}>
+                  {co.name}
+                </option>
+              ))}
+            </select>
           </Field>
 
           <div className="grid-2">
