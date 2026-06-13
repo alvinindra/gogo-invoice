@@ -15,9 +15,7 @@
     "format:check": "prettier -c ."
   },
   "dependencies": {
-    "@fontsource-variable/fraunces": "^5.2.9",
     "@fontsource-variable/hanken-grotesk": "^5.2.8",
-    "@fontsource-variable/spline-sans-mono": "^5.2.8",
     "@react-pdf/renderer": "^3.4.5",
     "date-fns": "^3.6.0",
     "file-saver": "^2.0.5",
