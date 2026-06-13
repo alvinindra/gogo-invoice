@@ -117,9 +117,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           'createInvoice({ company, client, items:[{description,quantity,unitPrice}], number?, currency?, taxRate?, notes?, terms?, status? }) → saved invoice',
           'addCompany({ name, address?, country?, bankDetails?, ... }) → company',
           'await getPdfBase64(idOrNumber?) → { filename, base64 }  (PDF bytes, for sending/saving)',
-          'await downloadPdf(idOrNumber?) → triggers a browser download',
+          'await downloadPdf(idOrNumber?) → triggers a browser download to ~/Downloads',
+          'await createAndDownload({...}) → make an invoice + download its PDF in one call',
+          'await createAndGetPdf({...}) → make an invoice + return { invoice, filename, base64 }',
           'importData(jsonOrObject) · exportData()',
-          'example: const inv = gogoInvoice.createInvoice({ company:"Personal", client:{name:"Acme"}, items:[{description:"Coaching",quantity:4,unitPrice:250}] }); const pdf = await gogoInvoice.getPdfBase64(inv.number)',
+          'example: await gogoInvoice.createAndDownload({ company:"Personal", client:{name:"Acme"}, items:[{description:"Coaching",quantity:4,unitPrice:250}] })',
         ].join('\n')
       },
       getData: () => dataRef.current,
@@ -215,7 +217,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!invoice) throw new Error('No invoice to download')
         const { downloadInvoicePdf } = await import('../pdf/download')
         await downloadInvoicePdf(invoice)
-        return { downloaded: true }
+        return { downloaded: true, filename: invoice.number + '.pdf' }
+      },
+      /** Create + save an invoice and immediately download its PDF, in one call. */
+      async createAndDownload(input: Record<string, unknown> = {}) {
+        const invoice = this.createInvoice(input)
+        const { downloadInvoicePdf } = await import('../pdf/download')
+        await downloadInvoicePdf(invoice)
+        return invoice
+      },
+      /** Create + save an invoice and return its PDF bytes, in one call. */
+      async createAndGetPdf(input: Record<string, unknown> = {}) {
+        const invoice = this.createInvoice(input)
+        const { renderInvoicePdfBase64, invoiceFileName } =
+          await import('../pdf/download')
+        return {
+          invoice,
+          filename: invoiceFileName(invoice),
+          base64: await renderInvoicePdfBase64(invoice),
+        }
       },
       importData(input: string | AppData) {
         const json = typeof input === 'string' ? input : JSON.stringify(input)

@@ -121,11 +121,19 @@ window.gogoInvoice.listInvoices() // read everything
 window.gogoInvoice.exportData()   // full backup object
 window.gogoInvoice.importData(backupJsonOrObject)
 
-// Get the PDF bytes (so the agent/harness can save or email the file)
-const { filename, base64 } = await window.gogoInvoice.getPdfBase64('INTV-FAS-002')
-// → write base64 to <filename> on the agent side, then attach/send it.
+// One call: create an invoice AND download its PDF (lands in ~/Downloads)
+await window.gogoInvoice.createAndDownload({
+  company: 'Gogo Coaching Service',
+  client: { name: 'Acme Inc.' },
+  items: [{ description: 'Coaching session', quantity: 4, unitPrice: 250 }],
+})
 
-await window.gogoInvoice.downloadPdf('INTV-FAS-002') // or just trigger a browser download
+// One call: create AND get the PDF bytes (to email/attach on the agent side)
+const { invoice, filename, base64 } = await window.gogoInvoice.createAndGetPdf({ /* … */ })
+
+// Or operate on an existing invoice by id/number:
+await window.gogoInvoice.downloadPdf('INTV-FAS-002')        // browser download
+const pdf = await window.gogoInvoice.getPdfBase64('INTV-FAS-002') // { filename, base64 }
 ```
 
 Everything is plain `localStorage` under the key `gogo-invoice:v1` (validated with
