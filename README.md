@@ -5,6 +5,8 @@ No backend, no sign-up, no tracking — your data never leaves your device.
 
 **▶ Live app: https://hallucinogen.github.io/gogo-invoice/**
 
+![Gogo Invoice — fill the invoice in place, with line-item templates](docs/screenshot.png)
+
 Inspired by [react-invoice-generator](https://github.com/tuanpham-dev/react-invoice-generator),
 rebuilt from scratch with multi-company support, an invoice history you can revisit
 and copy from, and JSON backup/restore.
