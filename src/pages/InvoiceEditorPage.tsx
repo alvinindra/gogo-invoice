@@ -26,6 +26,7 @@ import { COUNTRIES } from '../lib/countries'
 import { ITEM_TEMPLATES, TEMPLATE_GROUPS } from '../lib/templates'
 import { uid } from '../lib/id'
 import {
+  ChevronDownIcon,
   CopyIcon,
   DownloadIcon,
   GripIcon,
@@ -78,6 +79,8 @@ export default function InvoiceEditorPage() {
   const [showDiscount, setShowDiscount] = useState(false)
   const [showShipping, setShowShipping] = useState(false)
   const [logoError, setLogoError] = useState('')
+  // Collapsible toolbar fields on mobile (always shown on desktop via CSS).
+  const [fieldsOpen, setFieldsOpen] = useState(false)
 
   // Drag-to-reorder state for line items. `draggingId` is the row under the
   // pointer's grip; the ref mirrors it so pointer handlers stay current.
@@ -351,8 +354,18 @@ export default function InvoiceEditorPage() {
 
   return (
     <div className="editor-page">
-      <div className="doc-toolbar">
-        <div className="doc-toolbar__fields">
+      <div className={`doc-toolbar ${fieldsOpen ? 'doc-toolbar--open' : ''}`}>
+        <button
+          type="button"
+          className="doc-toolbar__toggle"
+          aria-expanded={fieldsOpen}
+          aria-controls="doc-toolbar-fields"
+          onClick={() => setFieldsOpen((v) => !v)}
+        >
+          <span>Invoice options</span>
+          <ChevronDownIcon className="doc-toolbar__chev" />
+        </button>
+        <div className="doc-toolbar__fields" id="doc-toolbar-fields">
           <label className="doc-toolbar__field">
             <span>Company</span>
             <select

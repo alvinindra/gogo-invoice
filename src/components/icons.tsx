@@ -130,6 +130,12 @@ export const CloseIcon = (p: IconProps) => (
   </svg>
 )
 
+export const ChevronDownIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+)
+
 /** Six-dot grip — drag handle affordance. */
 export const GripIcon = (p: IconProps) => (
   <svg {...base({ strokeWidth: 0, fill: 'currentColor', ...p })}>

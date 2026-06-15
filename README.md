@@ -24,6 +24,11 @@ and copy from, and JSON backup/restore.
   the company name is required — everything else is optional.
 - 🧾 **Full invoices** — line items, percentage **or** fixed discount, configurable
   tax (label + rate), shipping, notes and terms, plus draft / sent / paid status.
+- ↕️ **Drag-and-drop line items** — reorder rows by dragging the grip handle (works
+  with mouse, touch and pen), or from the keyboard (focus a grip, then ↑ / ↓).
+- 🏷️ **Watermark stamps** — overlay a diagonal stamp (Draft, Paid, Unpaid, Overdue,
+  Void, Confidential, Sample, Duplicate) on both the on-screen sheet and the
+  exported PDF. Pick one from the toolbar, or leave it off.
 - 🧩 **Line-item templates** for common trades — software/IT (incl. pass-through
   infrastructure), design, accounting & tax, finance & advisory, and general
   services. Insert a starter set of rows in one click, then fill the amounts.
@@ -40,6 +45,10 @@ and copy from, and JSON backup/restore.
 - 💾 **Backup & restore** — export all your data to a single JSON file and import it
   on another browser or computer.
 - 🌙 **Dark mode** — light / dark / follow-system.
+- 📱 **Responsive / mobile-friendly** — the layout reflows for phones: navigation
+  collapses into a full-height slide-in drawer, the editor toolbar collapses behind
+  an "Invoice options" toggle (Download / Save stay visible), and the line-item
+  table tightens while keeping its header.
 - 📦 **Offline-first PWA** — installable, works with no internet connection after the
   first load.
 
@@ -115,6 +124,7 @@ window.gogoInvoice.createInvoice({
   ],
   taxRate: 0,
   notes: 'Thank you!',
+  watermark: 'PAID', // optional diagonal stamp (also rendered into the PDF)
 })
 
 window.gogoInvoice.listInvoices() // read everything

@@ -241,11 +241,9 @@ h3 {
   flex: 1;
 }
 
-/* Hamburger + off-canvas sheet: hidden on desktop, shown under 600px. */
+/* Hamburger + off-canvas drawer: all hidden on desktop, shown under 600px. */
 .nav-toggle {
   display: none;
-  position: relative;
-  z-index: 51;
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -264,11 +262,72 @@ h3 {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 40;
-  background: rgba(20, 14, 4, 0.42);
+  z-index: 70;
+  background: rgba(20, 14, 4, 0.46);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.28s ease;
+}
+.nav-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.nav-drawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 80;
+  width: min(82vw, 320px);
+  height: 100dvh;
+  flex-direction: column;
+  /* Opaque sheet — solid surface so page content never shows through. */
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -18px 0 48px rgba(20, 14, 4, 0.22);
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.nav-drawer.is-open {
+  transform: translateX(0);
+}
+.nav-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 12px 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-drawer__title {
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.nav-drawer__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.nav-drawer__close:hover {
+  background: var(--surface-2);
+}
+.nav-drawer__links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 12px;
+  overflow-y: auto;
 }
 
 .main {
@@ -752,6 +811,33 @@ h3 {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+}
+/* Collapse toggle — only used on phones (hidden on desktop). */
+.doc-toolbar__toggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.doc-toolbar__toggle:hover {
+  background: var(--surface-2);
+}
+.doc-toolbar__chev {
+  transition: transform 0.2s ease;
+  color: var(--text-muted);
+}
+.doc-toolbar--open .doc-toolbar__chev {
+  transform: rotate(180deg);
 }
 .doc-toolbar__field {
   display: flex;
@@ -1330,7 +1416,8 @@ h3 {
 }
 
 @media (max-width: 600px) {
-  /* Masthead stays one row: brand · theme toggle · hamburger. */
+  /* Masthead stays one row: brand · theme toggle · hamburger. The inline
+     links move into the full-height drawer. */
   .nav-inner {
     padding: 0 14px;
     gap: 10px;
@@ -1338,41 +1425,20 @@ h3 {
   .brand span {
     font-size: 1.1rem;
   }
+  .nav-links {
+    display: none;
+  }
   .nav-toggle {
     display: inline-flex;
   }
   .nav-backdrop {
     display: block;
   }
-  .nav-backdrop.is-open {
-    opacity: 1;
-    pointer-events: auto;
+  .nav-drawer {
+    display: flex;
   }
-
-  /* The nav links become an off-canvas sheet sliding in from the right. */
-  .nav-links {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 50;
-    width: min(78vw, 300px);
-    margin-left: 0;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    padding: 76px 16px 24px;
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    box-shadow: -16px 0 40px rgba(20, 14, 4, 0.18);
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-  .nav-links.is-open {
-    transform: translateX(0);
-  }
-  .nav-link {
-    padding: 12px 14px;
+  .nav-drawer .nav-link {
+    padding: 13px 14px;
     font-size: 1rem;
   }
 
@@ -1380,13 +1446,43 @@ h3 {
     padding: 18px 12px 56px;
   }
 
-  /* doc-toolbar no longer needs to dodge a wrapping nav, but the short
-     fixed select widths would overflow — let them shrink. */
+  /* doc-toolbar: stack into a column, collapse the field selects behind a
+     toggle, and keep the primary actions (Download / Save) always visible. */
   .doc-toolbar {
-    top: 56px;
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .doc-toolbar__toggle {
+    display: flex;
+    order: -1;
+  }
+  .doc-toolbar__fields {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+  .doc-toolbar--open .doc-toolbar__fields {
+    display: flex;
+  }
+  .doc-toolbar__field {
+    width: 100%;
   }
   .doc-toolbar__field .select {
+    width: 100%;
     min-width: 0;
+  }
+  .doc-toolbar__actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  /* Download + Save split the row; icon-only actions keep their size. */
+  .doc-toolbar__actions .btn--primary,
+  .doc-toolbar__actions .btn:not(.btn--ghost):not(.btn--danger) {
+    flex: 1 1 auto;
   }
 
   .paper {
