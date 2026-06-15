@@ -3,7 +3,7 @@
 A simple, **offline-first invoice generator** that runs entirely in your browser.
 No backend, no sign-up, no tracking — your data never leaves your device.
 
-**▶ Live app: https://hallucinogen.github.io/gogo-invoice/**
+**▶ Live app: https://alvinindra.github.io/gogo-invoice/**
 
 ![Gogo Invoice — fill the invoice in place, with line-item templates](docs/screenshot.png)
 

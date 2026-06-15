@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Offline-first invoice generator. No backend — your data lives on your device. Multiple company headers, history, PDF export and JSON backup.",
-  "homepage": "https://hallucinogen.github.io/gogo-invoice/",
+  "homepage": "https://alvinindra.github.io/gogo-invoice/",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
