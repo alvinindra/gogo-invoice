@@ -33,6 +33,7 @@ import {
   SaveIcon,
   TrashIcon,
 } from '../components/icons'
+import { WATERMARK_PRESETS } from '../types'
 import type { Company, Invoice, LineItem } from '../types'
 
 type Mode = 'new' | 'edit' | 'missing'
@@ -406,6 +407,22 @@ export default function InvoiceEditorPage() {
               ))}
             </select>
           </label>
+          <label className="doc-toolbar__field">
+            <span>Watermark</span>
+            <select
+              className="select"
+              value={draft.watermark}
+              aria-label="Watermark stamp"
+              onChange={(e) => set('watermark', e.target.value)}
+            >
+              <option value="">None</option>
+              {WATERMARK_PRESETS.map((w) => (
+                <option key={w} value={w}>
+                  {w.charAt(0) + w.slice(1).toLowerCase()}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
         <div className="doc-toolbar__actions">
@@ -442,6 +459,11 @@ export default function InvoiceEditorPage() {
       </div>
 
       <div className="paper paper--edit">
+        {draft.watermark ? (
+          <div className="paper__watermark" aria-hidden="true">
+            <span>{draft.watermark}</span>
+          </div>
+        ) : null}
         {/* Header */}
         <div className="paper__top">
           <div className="paper__brand">
@@ -607,18 +629,12 @@ export default function InvoiceEditorPage() {
                   ariaLabel={`Item ${i + 1} description`}
                   onChange={(v) => updateItem(it.id, { description: v })}
                 />
-                <span className="cell-label cell-label--qty" aria-hidden="true">
-                  Qty
-                </span>
                 <EditableNumber
                   className="r item-qty"
                   value={it.quantity}
                   ariaLabel={`Item ${i + 1} quantity`}
                   onChange={(n) => updateItem(it.id, { quantity: n })}
                 />
-                <span className="cell-label cell-label--rate" aria-hidden="true">
-                  Rate
-                </span>
                 <EditableNumber
                   className="r item-rate"
                   value={it.unitPrice}

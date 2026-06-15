@@ -75,6 +75,7 @@ export function createInvoiceForCompany(company: Company): Invoice {
     company: snapshotOf(company),
     number: suggestedNumber(company),
     status: 'sent',
+    watermark: '',
     currency: company.defaultCurrency || CURRENCY_DEFAULT,
     issueDate: todayISO(),
     dueDate: plusDaysISO(14),

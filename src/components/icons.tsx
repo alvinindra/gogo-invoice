@@ -118,6 +118,18 @@ export const SaveIcon = (p: IconProps) => (
   </svg>
 )
 
+export const MenuIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M3 6h18M3 12h18M3 18h18" />
+  </svg>
+)
+
+export const CloseIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M18 6 6 18M6 6l12 12" />
+  </svg>
+)
+
 /** Six-dot grip — drag handle affordance. */
 export const GripIcon = (p: IconProps) => (
   <svg {...base({ strokeWidth: 0, fill: 'currentColor', ...p })}>

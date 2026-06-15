@@ -114,7 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return [
           'window.gogoInvoice — automation API',
           'getData() · listCompanies() · listInvoices()',
-          'createInvoice({ company, client, items:[{description,quantity,unitPrice}], number?, currency?, taxRate?, notes?, terms?, status? }) → saved invoice',
+          'createInvoice({ company, client, items:[{description,quantity,unitPrice}], number?, currency?, taxRate?, notes?, terms?, status?, watermark? }) → saved invoice',
           'addCompany({ name, address?, country?, bankDetails?, ... }) → company',
           'await getPdfBase64(idOrNumber?) → { filename, base64 }  (PDF bytes, for sending/saving)',
           'await downloadPdf(idOrNumber?) → triggers a browser download to ~/Downloads',
@@ -158,6 +158,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           number: (input.number as string) ?? base.number,
           currency: (input.currency as string) ?? base.currency,
           status: (input.status as Invoice['status']) ?? base.status,
+          watermark: (input.watermark as string) ?? base.watermark,
           issueDate: (input.issueDate as string) ?? base.issueDate,
           dueDate: (input.dueDate as string) ?? base.dueDate,
           client: { ...base.client, ...((input.client as object) || {}) },

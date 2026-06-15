@@ -18,11 +18,12 @@ Key methods (all data persists to localStorage and shows in the History view):
 
 - `listCompanies()` / `listInvoices()` / `getData()` — read current state.
 - `addCompany({ name, address?, country?, email?, phone?, bankDetails?, defaultCurrency? })` → company.
-- `createInvoice({ company, client, items, number?, currency?, taxRate?, discountValue?, shipping?, notes?, terms?, status? })` → saved invoice.
+- `createInvoice({ company, client, items, number?, currency?, taxRate?, discountValue?, shipping?, notes?, terms?, status?, watermark? })` → saved invoice.
   - `company`: company name (matched case-insensitively) or `companyId`. Created if missing.
   - `client`: `{ name, address?, country?, email?, phone? }`.
   - `items`: array of `{ description, quantity, unitPrice }`. `unitPrice` is in major
     currency units (e.g. dollars, not cents).
+  - `watermark`: optional diagonal stamp on the sheet + PDF (e.g. `"DRAFT"`, `"PAID"`).
   - Returns the saved invoice, including `{ id, number }`. Omitted optionals default to:
     `number` = next auto number for the company, `issueDate` = today, `dueDate` = +14 days,
     `taxRate` = 0, `currency` = the company default. `createAndDownload` / `createAndGetPdf`

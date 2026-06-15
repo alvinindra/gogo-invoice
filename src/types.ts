@@ -61,12 +61,26 @@ export type DiscountType = z.infer<typeof discountTypeSchema>
 export const invoiceStatusSchema = z.enum(['draft', 'sent', 'paid'])
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
 
+/** Built-in watermark presets offered in the editor ('' = no watermark). */
+export const WATERMARK_PRESETS = [
+  'DRAFT',
+  'PAID',
+  'UNPAID',
+  'OVERDUE',
+  'VOID',
+  'CONFIDENTIAL',
+  'SAMPLE',
+  'DUPLICATE',
+] as const
+
 export const invoiceSchema = z.object({
   id: z.string(),
   companyId: z.string(),
   company: companySnapshotSchema,
   number: z.string().default(''),
   status: invoiceStatusSchema.default('draft'),
+  /** Optional diagonal stamp shown on the sheet + PDF (e.g. DRAFT, PAID). */
+  watermark: z.string().default(''),
   currency: z.string().default(CURRENCY_DEFAULT),
   issueDate: z.string(),
   dueDate: z.string(),

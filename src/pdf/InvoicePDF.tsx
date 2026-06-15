@@ -102,6 +102,22 @@ const styles = StyleSheet.create({
     color: COLORS.faint,
     fontSize: 8,
   },
+  watermark: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  watermarkText: {
+    fontFamily: 'Helvetica-Bold',
+    color: COLORS.primary,
+    opacity: 0.1,
+    letterSpacing: 4,
+    transform: 'rotate(-35deg)',
+  },
 })
 
 export function InvoiceDocument({ invoice }: { invoice: Invoice }) {
@@ -131,6 +147,18 @@ export function InvoiceDocument({ invoice }: { invoice: Invoice }) {
   return (
     <Document title={`Invoice ${invoice.number}`} author={c.name || 'Gogo Invoice'}>
       <Page size="A4" style={styles.page}>
+        {invoice.watermark ? (
+          <View style={styles.watermark} fixed>
+            <Text
+              style={[
+                styles.watermarkText,
+                { fontSize: Math.min(120, Math.round(900 / invoice.watermark.length)) },
+              ]}
+            >
+              {invoice.watermark}
+            </Text>
+          </View>
+        ) : null}
         <View style={styles.top}>
           <View style={styles.brand}>
             {logoOk ? <Image style={styles.logo} src={c.logo} /> : null}

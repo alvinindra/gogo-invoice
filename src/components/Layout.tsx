@@ -1,38 +1,91 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useStore } from '../store/AppStore'
 import { ThemeToggle } from './ThemeToggle'
+import { CloseIcon, MenuIcon } from './icons'
 
 const BASE_URL = import.meta.env?.BASE_URL ?? '/'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { saveError } = useStore()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  // Close the mobile sheet on Escape, and lock body scroll while it's open.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
+
   return (
     <div className="app">
       <header className="nav">
         <div className="nav-inner">
-          <NavLink to="/" className="brand">
+          <NavLink to="/" className="brand" onClick={() => setMenuOpen(false)}>
             <img src={`${BASE_URL}icon.svg`} alt="" />
             <span>Gogo Invoice</span>
           </NavLink>
-          <nav className="nav-links">
-            <NavLink to="/" end className="nav-link">
+
+          <span className="nav-spacer" />
+
+          <nav
+            id="nav-sheet"
+            className={`nav-links ${menuOpen ? 'is-open' : ''}`}
+            aria-label="Primary"
+          >
+            <NavLink to="/" end className="nav-link" onClick={() => setMenuOpen(false)}>
               New invoice
             </NavLink>
-            <NavLink to="/history" className="nav-link">
+            <NavLink
+              to="/history"
+              className="nav-link"
+              onClick={() => setMenuOpen(false)}
+            >
               History
             </NavLink>
-            <NavLink to="/companies" className="nav-link">
+            <NavLink
+              to="/companies"
+              className="nav-link"
+              onClick={() => setMenuOpen(false)}
+            >
               Companies
             </NavLink>
-            <NavLink to="/data" className="nav-link">
+            <NavLink to="/data" className="nav-link" onClick={() => setMenuOpen(false)}>
               Backup
             </NavLink>
           </nav>
-          <span className="nav-spacer" />
+
           <ThemeToggle />
+
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            aria-controls="nav-sheet"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            {menuOpen ? (
+              <CloseIcon className="btn-icon" />
+            ) : (
+              <MenuIcon className="btn-icon" />
+            )}
+          </button>
         </div>
       </header>
+
+      <div
+        className={`nav-backdrop ${menuOpen ? 'is-open' : ''}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
 
       {saveError ? (
         <div className="save-error" role="alert">
