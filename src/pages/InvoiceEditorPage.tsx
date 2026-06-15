@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+  type PointerEvent,
+} from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/AppStore'
 import { EditableArea, EditableNumber, EditableText } from '../components/Editable'
@@ -20,6 +28,7 @@ import { uid } from '../lib/id'
 import {
   CopyIcon,
   DownloadIcon,
+  GripIcon,
   PlusIcon,
   SaveIcon,
   TrashIcon,
@@ -68,6 +77,12 @@ export default function InvoiceEditorPage() {
   const [showDiscount, setShowDiscount] = useState(false)
   const [showShipping, setShowShipping] = useState(false)
   const [logoError, setLogoError] = useState('')
+
+  // Drag-to-reorder state for line items. `draggingId` is the row under the
+  // pointer's grip; the ref mirrors it so pointer handlers stay current.
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const dragRef = useRef<string | null>(null)
+  const rowsRef = useRef<HTMLDivElement>(null)
 
   // Build the working draft from the route. Only re-runs on route change.
   useEffect(() => {
@@ -204,6 +219,69 @@ export default function InvoiceEditorPage() {
     setDraft((d) => (d ? { ...d, items: [...d.items, emptyLineItem()] } : d))
   const removeItem = (itemId: string) =>
     setDraft((d) => (d ? { ...d, items: d.items.filter((it) => it.id !== itemId) } : d))
+
+  // Move the item with id `fromId` to occupy `toId`'s slot, shifting the rest.
+  const moveItem = (fromId: string, toId: string) =>
+    setDraft((d) => {
+      if (!d || fromId === toId) return d
+      const from = d.items.findIndex((it) => it.id === fromId)
+      const to = d.items.findIndex((it) => it.id === toId)
+      if (from < 0 || to < 0) return d
+      const items = [...d.items]
+      const [moved] = items.splice(from, 1)
+      items.splice(to, 0, moved)
+      return { ...d, items }
+    })
+  // Nudge an item up (-1) or down (+1) — the keyboard path for reordering.
+  const moveItemBy = (itemId: string, delta: number) =>
+    setDraft((d) => {
+      if (!d) return d
+      const from = d.items.findIndex((it) => it.id === itemId)
+      const to = from + delta
+      if (from < 0 || to < 0 || to >= d.items.length) return d
+      const items = [...d.items]
+      const [moved] = items.splice(from, 1)
+      items.splice(to, 0, moved)
+      return { ...d, items }
+    })
+
+  // --- pointer drag-to-reorder (works with mouse, touch and pen) ---
+  // The grip captures the pointer; as it moves we find the row under it and
+  // live-reorder. State already holds the new order, so dropping is a no-op.
+  const startDrag = (e: PointerEvent<HTMLButtonElement>, itemId: string) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return
+    dragRef.current = itemId
+    setDraggingId(itemId)
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+  const onDragMove = (e: PointerEvent<HTMLButtonElement>) => {
+    const fromId = dragRef.current
+    if (!fromId || !rowsRef.current) return
+    e.preventDefault()
+    const rows = [...rowsRef.current.querySelectorAll<HTMLElement>('[data-row-id]')]
+    const over = rows.find((row) => {
+      const r = row.getBoundingClientRect()
+      return e.clientY >= r.top && e.clientY <= r.bottom
+    })
+    const overId = over?.dataset.rowId
+    if (overId && overId !== fromId) moveItem(fromId, overId)
+  }
+  const endDrag = (e: PointerEvent<HTMLButtonElement>) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    dragRef.current = null
+    setDraggingId(null)
+  }
+  // Keyboard reordering from the focused grip — accessible alternative to drag.
+  const onGripKey = (e: KeyboardEvent<HTMLButtonElement>, itemId: string) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      moveItemBy(itemId, -1)
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      moveItemBy(itemId, 1)
+    }
+  }
 
   const applyTemplate = (templateId: string) => {
     const tpl = ITEM_TEMPLATES.find((t) => t.id === templateId)
@@ -493,49 +571,73 @@ export default function InvoiceEditorPage() {
         {/* Items */}
         <div className="paper__items">
           <div className="paper__items-head">
+            <span />
             <span>Description</span>
             <span className="r">Qty</span>
             <span className="r">Rate</span>
             <span className="r">Amount</span>
             <span />
           </div>
-          {draft.items.map((it, i) => (
-            <div
-              className="paper__items-row"
-              key={it.id}
-              role="group"
-              aria-label={`Item ${i + 1}`}
-            >
-              <EditableText
-                value={it.description}
-                placeholder="e.g. Web development — June 2026"
-                ariaLabel={`Item ${i + 1} description`}
-                onChange={(v) => updateItem(it.id, { description: v })}
-              />
-              <EditableNumber
-                className="r"
-                value={it.quantity}
-                ariaLabel={`Item ${i + 1} quantity`}
-                onChange={(n) => updateItem(it.id, { quantity: n })}
-              />
-              <EditableNumber
-                className="r"
-                value={it.unitPrice}
-                ariaLabel={`Item ${i + 1} unit price`}
-                onChange={(n) => updateItem(it.id, { unitPrice: n })}
-              />
-              <span className="r amount">{money(lineTotal(it))}</span>
-              <button
-                type="button"
-                className="row-remove"
-                title={`Remove item ${i + 1}`}
-                aria-label={`Remove item ${i + 1}`}
-                onClick={() => removeItem(it.id)}
+          <div className="paper__items-body" ref={rowsRef}>
+            {draft.items.map((it, i) => (
+              <div
+                className={`paper__items-row${draggingId === it.id ? ' is-dragging' : ''}`}
+                key={it.id}
+                data-row-id={it.id}
+                role="group"
+                aria-label={`Item ${i + 1}`}
               >
-                ×
-              </button>
-            </div>
-          ))}
+                <button
+                  type="button"
+                  className="row-drag"
+                  aria-label={`Reorder item ${i + 1} (drag, or use arrow keys)`}
+                  title="Drag to reorder"
+                  onPointerDown={(e) => startDrag(e, it.id)}
+                  onPointerMove={onDragMove}
+                  onPointerUp={endDrag}
+                  onPointerCancel={endDrag}
+                  onKeyDown={(e) => onGripKey(e, it.id)}
+                >
+                  <GripIcon className="btn-icon" aria-hidden="true" />
+                </button>
+                <EditableText
+                  className="item-desc"
+                  value={it.description}
+                  placeholder="e.g. Web development — June 2026"
+                  ariaLabel={`Item ${i + 1} description`}
+                  onChange={(v) => updateItem(it.id, { description: v })}
+                />
+                <span className="cell-label cell-label--qty" aria-hidden="true">
+                  Qty
+                </span>
+                <EditableNumber
+                  className="r item-qty"
+                  value={it.quantity}
+                  ariaLabel={`Item ${i + 1} quantity`}
+                  onChange={(n) => updateItem(it.id, { quantity: n })}
+                />
+                <span className="cell-label cell-label--rate" aria-hidden="true">
+                  Rate
+                </span>
+                <EditableNumber
+                  className="r item-rate"
+                  value={it.unitPrice}
+                  ariaLabel={`Item ${i + 1} unit price`}
+                  onChange={(n) => updateItem(it.id, { unitPrice: n })}
+                />
+                <span className="r amount">{money(lineTotal(it))}</span>
+                <button
+                  type="button"
+                  className="row-remove"
+                  title={`Remove item ${i + 1}`}
+                  aria-label={`Remove item ${i + 1}`}
+                  onClick={() => removeItem(it.id)}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
           <div className="paper__items-actions">
             <button type="button" className="add-item" onClick={addItem}>
               <PlusIcon className="btn-icon" /> Add item

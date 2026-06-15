@@ -991,7 +991,7 @@ h3 {
 .paper__items-head,
 .paper__items-row {
   display: grid;
-  grid-template-columns: 1fr 56px 100px 124px 24px;
+  grid-template-columns: 22px 1fr 56px 100px 124px 24px;
   gap: 8px;
   align-items: center;
 }
@@ -1009,6 +1009,50 @@ h3 {
   border-bottom: 1px solid var(--paper-line);
   padding: 7px 12px;
 }
+.paper__items-row.is-dragging {
+  background: #f3f7f3;
+  border-radius: 7px;
+  box-shadow: var(--shadow-lg);
+  border-bottom-color: transparent;
+}
+
+/* Drag handle (grip). Touch-action:none so a touch-drag reorders instead of
+   scrolling the page. Hidden until row hover/focus on pointer devices. */
+.row-drag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #c7bda6;
+  cursor: grab;
+  border-radius: 4px;
+  touch-action: none;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    color 0.12s,
+    background 0.12s;
+}
+.row-drag:active {
+  cursor: grabbing;
+}
+.paper__items-row:hover .row-drag,
+.row-drag:focus-visible {
+  opacity: 1;
+}
+.row-drag:hover {
+  color: var(--paper-accent);
+  background: #eef3ee;
+}
+.row-drag:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  color: var(--paper-accent);
+}
 .paper__items-head .r,
 .paper__items-row .r {
   text-align: right;
@@ -1024,6 +1068,15 @@ h3 {
   padding-right: 5px;
   color: #211c14;
   font-size: 12.5px;
+}
+/* Per-field labels for the stacked mobile layout; hidden on the desktop grid. */
+.cell-label {
+  display: none;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #837a67;
 }
 .row-remove {
   border: none;
@@ -1206,6 +1259,183 @@ h3 {
   margin: 10px 0 0;
   font-size: 11px;
   color: #837a67;
+}
+
+/* ============================================================
+   Responsive — tablet then phone. The invoice sheet keeps its
+   look but loses padding; the line-item table becomes stacked
+   cards so every field stays tappable on a narrow screen.
+   ============================================================ */
+@media (max-width: 820px) {
+  .nav-inner {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .main {
+    padding: 22px 16px 60px;
+  }
+  .paper {
+    padding: 32px;
+  }
+  .editor-page {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Masthead: brand + theme toggle on row one, links wrap to row two. */
+  .nav-inner {
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px 14px;
+    gap: 8px 12px;
+  }
+  .brand span {
+    font-size: 1.1rem;
+  }
+  .nav-spacer {
+    display: none;
+  }
+  .nav-links {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main {
+    padding: 18px 12px 56px;
+  }
+
+  /* The sticky doc-toolbar fights the now-taller wrapping nav; let it scroll. */
+  .doc-toolbar {
+    position: static;
+    top: auto;
+  }
+  .doc-toolbar__field .select {
+    min-width: 0;
+  }
+  .doc-toolbar__actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .paper {
+    padding: 20px 16px;
+  }
+
+  /* Header stacks: brand over the INVOICE title block. */
+  .paper__top {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .paper__brand {
+    max-width: 100%;
+  }
+  .paper__title {
+    text-align: left;
+  }
+  .paper__title h1 {
+    font-size: 34px;
+  }
+  .paper__meta-grid {
+    justify-content: start;
+    grid-template-columns: auto 1fr;
+  }
+  .paper__meta-grid .label,
+  .paper__meta-val,
+  .paper__date {
+    text-align: left;
+  }
+
+  .paper__parties {
+    flex-direction: column;
+    gap: 18px;
+    margin: 22px 0 18px;
+  }
+
+  /* Line items → stacked cards. The column header is replaced by per-field
+     labels rendered inside each card (.cell-label). */
+  .paper__items-head {
+    display: none;
+  }
+  .paper__items-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .paper__items-row {
+    grid-template-columns: 26px 1fr auto;
+    grid-template-areas:
+      'drag desc   desc'
+      'drag qtylbl ratelbl'
+      'drag qty    rate'
+      'drag amount remove';
+    gap: 4px 12px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--paper-line);
+    border-radius: 9px;
+  }
+  .row-drag {
+    grid-area: drag;
+    opacity: 1;
+    align-self: center;
+    height: 100%;
+  }
+  .item-desc {
+    grid-area: desc;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .cell-label {
+    display: block;
+  }
+  .cell-label--qty {
+    grid-area: qtylbl;
+    align-self: end;
+  }
+  .cell-label--rate {
+    grid-area: ratelbl;
+    align-self: end;
+  }
+  .item-qty {
+    grid-area: qty;
+  }
+  .item-rate {
+    grid-area: rate;
+  }
+  /* Numeric inputs read left-aligned under their labels on mobile. */
+  .paper__items-row .item-qty,
+  .paper__items-row .item-rate {
+    text-align: left;
+    border: 1px solid var(--paper-line);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .paper__items-row .amount {
+    grid-area: amount;
+    text-align: left;
+    align-self: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .row-remove {
+    grid-area: remove;
+    opacity: 1;
+    justify-self: end;
+    align-self: center;
+  }
+
+  /* Totals span the full width instead of a fixed 280px box. */
+  .paper__totals {
+    margin-top: 16px;
+  }
+  .paper__totals-box {
+    width: 100%;
+  }
 }
 
 .pwa-update {

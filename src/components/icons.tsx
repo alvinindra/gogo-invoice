@@ -117,3 +117,15 @@ export const SaveIcon = (p: IconProps) => (
     <path d="M17 21v-8H7v8M7 3v5h8" />
   </svg>
 )
+
+/** Six-dot grip — drag handle affordance. */
+export const GripIcon = (p: IconProps) => (
+  <svg {...base({ strokeWidth: 0, fill: 'currentColor', ...p })}>
+    <circle cx="9" cy="6" r="1.6" />
+    <circle cx="15" cy="6" r="1.6" />
+    <circle cx="9" cy="12" r="1.6" />
+    <circle cx="15" cy="12" r="1.6" />
+    <circle cx="9" cy="18" r="1.6" />
+    <circle cx="15" cy="18" r="1.6" />
+  </svg>
+)
